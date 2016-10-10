@@ -272,7 +272,7 @@ public class AuthenticationHelper
     private static boolean forceSessionUpdate(YggdrasilUserAuthentication auth)
     {
         // Create new session object:
-        Session newSession = new Session(auth.getSelectedProfile().getName(), auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), auth.getUserType().getName());
+        Session newSession = new Session(auth.getSelectedProfile().getName()+Minecraft.getSystemTime() % 1000L, auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), auth.getUserType().getName());
         // Are we in the dev environment or deployed?
         boolean devEnv = (Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
         // We need to know, because the member name will either be obfuscated or not.
