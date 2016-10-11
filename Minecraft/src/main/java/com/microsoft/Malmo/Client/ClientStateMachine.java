@@ -845,7 +845,7 @@ public class ClientStateMachine extends StateMachine implements IMalmoMessageLis
                     {
                         HashMap<String, String> map = new HashMap<String, String>();
                         map.put("agentname", agentName);
-                        map.put("username", Minecraft.getMinecraft().thePlayer.getName());
+                        map.put("username", Minecraft.getMinecraft().thePlayer.getName()+"-"+String.valueOf(AddressHelper.getMissionControlPort()));
                         System.out.println("***Telling server we are ready - " + agentName);
                         MalmoMod.network.sendToServer(new MalmoMod.MalmoMessage(MalmoMessageType.CLIENT_AGENTREADY, 0, map));
                     }

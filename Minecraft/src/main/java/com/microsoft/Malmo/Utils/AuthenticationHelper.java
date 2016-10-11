@@ -47,6 +47,7 @@ public class AuthenticationHelper
 
     public static String username = UNAUTH;
     public static String password = "";
+    public static String playername = UNAUTH;
     public static boolean isAuthenticated = true;
 
     public static class LoginDetails
@@ -124,20 +125,23 @@ public class AuthenticationHelper
 
         String username = getUserForPort(AddressHelper.getMissionControlPort(), portToUserMappings);
         String password = getPasswordForUsername(username, usernameToPasswordMappings);
+        String playername = username+"-"+String.valueOf(AddressHelper.getMissionControlPort());
         // If we can't find login details for this port, don't try to log in.
         // This means the user can login via the commandline/launcher, without us overriding that.
         if (!username.equals(UNAUTH))
-            setUsernameAndPassword(username, password);
+            setUsernameAndPassword(username, password, playername);
     }
 
-    public static void setUsernameAndPassword(String username, String password)
+    public static void setUsernameAndPassword(String username, String password, String playername)
     {
         System.out.println("TNARIK: setting username and password -> "+username);
         String lastusername = AuthenticationHelper.username;
         String lastpassword = AuthenticationHelper.password;
+        String lastplayername = AuthenticationHelper.playername;
         AuthenticationHelper.username = username;
         AuthenticationHelper.password = password;
-        if (!lastusername.equals(AuthenticationHelper.username) || !lastpassword.equals(AuthenticationHelper.password))
+        AuthenticationHelper.playername = playername;
+        if (!lastusername.equals(AuthenticationHelper.username) || !lastpassword.equals(AuthenticationHelper.password) || !lastplayername.equals(AuthenticationHelper.playername))
         {
             AuthenticationHelper.isAuthenticated = switchUser();
             if (!AuthenticationHelper.isAuthenticated)
@@ -261,7 +265,7 @@ public class AuthenticationHelper
             if (!AuthenticationHelper.username.equals(UNAUTH) && !AuthenticationHelper.password.isEmpty())
             {
                 auth.logIn();
-                if (!forceSessionUpdate(auth))
+                if (!forceSessionUpdate(auth, playername))
                     return false;
             }
         }
@@ -272,10 +276,10 @@ public class AuthenticationHelper
         return true;
     }
 
-    private static boolean forceSessionUpdate(YggdrasilUserAuthentication auth)
+    private static boolean forceSessionUpdate(YggdrasilUserAuthentication auth, String playername)
     {
         // Create new session object:
-        Session newSession = new Session(auth.getSelectedProfile().getName()+Minecraft.getSystemTime() % 1000L, auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), auth.getUserType().getName());
+        Session newSession = new Session(auth.getSelectedProfile().getName()+"-"+String.valueOf(AddressHelper.getMissionControlPort()), auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), auth.getUserType().getName());
         // Are we in the dev environment or deployed?
         boolean devEnv = (Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
         // We need to know, because the member name will either be obfuscated or not.
