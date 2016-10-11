@@ -126,6 +126,8 @@ public class AuthenticationHelper
         String username = getUserForPort(AddressHelper.getMissionControlPort(), portToUserMappings);
         String password = getPasswordForUsername(username, usernameToPasswordMappings);
         String playername = username+"_"+String.valueOf(AddressHelper.getMissionControlPort());
+
+        System.out.println("TNARIK this is to update the username -> "+username);
         // If we can't find login details for this port, don't try to log in.
         // This means the user can login via the commandline/launcher, without us overriding that.
         if (!username.equals(UNAUTH))
@@ -279,6 +281,7 @@ public class AuthenticationHelper
     private static boolean forceSessionUpdate(YggdrasilUserAuthentication auth, String playername)
     {
         // Create new session object:
+        System.out.println("TNARIK this is to create a new session from  -> "+auth.getSelectedProfile().getName());
         Session newSession = new Session(auth.getSelectedProfile().getName()+"_"+String.valueOf(AddressHelper.getMissionControlPort()), auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), auth.getUserType().getName());
         // Are we in the dev environment or deployed?
         boolean devEnv = (Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
