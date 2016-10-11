@@ -644,6 +644,8 @@ public class ServerStateMachine extends StateMachine
             super.onMessage(messageType, data);
             if (messageType == MalmoMessageType.CLIENT_AGENTREADY)
             {
+                System.out.println("TNARIK : a Client Agent is READY username ->"+data.get("username"));
+                System.out.println("TNARIK : a Client Agent is READY agentname ->"+data.get("agentname"));
                 // A client has joined and is waiting for us to tell us it can proceed.
                 // Initialise the player, and store a record mapping from the username to the agentname.
                 String username = data.get("username");
@@ -655,6 +657,7 @@ public class ServerStateMachine extends StateMachine
                     this.usernameToAgentnameMap.put(username, agentname);
                     this.pendingRunningAgents.add(username);
                     ServerStateMachine.this.addUsernameToWatchList(username);   // Now we've got it, we need to watch it - if it disappears, that's an error.
+                    System.out.println("TNARIK : watching the list ");
 
                     // If all clients have now joined, we can tell them to go ahead.
                     if (this.pendingReadyAgents.isEmpty())
