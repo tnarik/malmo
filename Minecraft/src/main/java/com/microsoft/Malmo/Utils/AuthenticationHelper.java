@@ -132,6 +132,7 @@ public class AuthenticationHelper
 
     public static void setUsernameAndPassword(String username, String password)
     {
+        System.out.println("TNARIK: setting username and password -> "+username);
         String lastusername = AuthenticationHelper.username;
         String lastpassword = AuthenticationHelper.password;
         AuthenticationHelper.username = username;
@@ -253,6 +254,8 @@ public class AuthenticationHelper
         auth.logOut();
         auth.setUsername(AuthenticationHelper.username);
         auth.setPassword(AuthenticationHelper.password);
+
+        System.out.println("TNARIK: switching user to -> "+AuthenticationHelper.username);
         try
         {
             if (!AuthenticationHelper.username.equals(UNAUTH) && !AuthenticationHelper.password.isEmpty())
