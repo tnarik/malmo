@@ -294,6 +294,7 @@ public class AuthenticationHelper
             session = Minecraft.class.getDeclaredField(sessionMemberName);
             session.setAccessible(true);
             session.set(Minecraft.getMinecraft(), newSession);
+            System.out.println("TNARIK the new session is set");
             return true;
         }
         catch (SecurityException e)

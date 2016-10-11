@@ -65,6 +65,7 @@ public class AddressHelper
 	{
 		if (port != AddressHelper.missionControlPort)
 		{
+			System.out.println("TNARIK: setting the mission control port, because it is different");
 			AddressHelper.missionControlPort = port;
 			// Also update our metadata, for displaying to the user:
 			ModMetadata md = Loader.instance().activeModContainer().getMetadata();

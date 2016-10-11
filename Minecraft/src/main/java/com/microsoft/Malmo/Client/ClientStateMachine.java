@@ -482,6 +482,7 @@ public class ClientStateMachine extends StateMachine implements IMalmoMessageLis
         this.missionPoller.start();
 
         // Tell the address helper what the actual port is:
+        System.out.println("TNARIK : about to set the Mission Control Port, which will trigger a AuthenticationHelper update");
         AddressHelper.setMissionControlPort(ClientStateMachine.this.missionPoller.getPortBlocking());
         if (AddressHelper.getMissionControlPort() == -1)
         {
