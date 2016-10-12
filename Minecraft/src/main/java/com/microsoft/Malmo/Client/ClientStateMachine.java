@@ -677,6 +677,7 @@ public class ClientStateMachine extends StateMachine implements IMalmoMessageLis
             MissionInit missionInit = missionInitResult.missionInit;
             if (missionInit != null)
             {
+                System.out.println("TNARIK using username (while dormant) ->"+ Minecraft.getMinecraft().thePlayer.getName());
                 missionInit.getClientAgentConnection().setAgentIPAddress(comip.ipAddress);
                 System.out.println("Mission received: " + missionInit.getMission().getAbout().getSummary());
                 csMachine.currentMissionInit = missionInit;
@@ -1280,6 +1281,7 @@ public class ClientStateMachine extends StateMachine implements IMalmoMessageLis
         {
             try
             {
+                System.out.println("TNARIK using username (while CreateWorldEpisode) ->"+ Minecraft.getMinecraft().thePlayer.getName());
                 // We need to use the server's MissionHandlers here:
                 MissionBehaviour serverHandlers = MissionBehaviour.createServerHandlersFromMissionInit(currentMissionInit());
                 if (serverHandlers != null && serverHandlers.worldGenerator != null)
