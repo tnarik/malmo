@@ -47,7 +47,6 @@ public class AuthenticationHelper
 
     public static String username = UNAUTH;
     public static String password = "";
-    public static String playername = UNAUTH;
     public static boolean isAuthenticated = true;
 
     public static class LoginDetails
@@ -125,25 +124,19 @@ public class AuthenticationHelper
 
         String username = getUserForPort(AddressHelper.getMissionControlPort(), portToUserMappings);
         String password = getPasswordForUsername(username, usernameToPasswordMappings);
-        String playername = username+"_"+String.valueOf(AddressHelper.getMissionControlPort());
-
-        System.out.println("TNARIK this is to update the username -> "+username);
         // If we can't find login details for this port, don't try to log in.
         // This means the user can login via the commandline/launcher, without us overriding that.
         if (!username.equals(UNAUTH))
-            setUsernameAndPassword(username, password, playername);
+            setUsernameAndPassword(username, password);
     }
 
-    public static void setUsernameAndPassword(String username, String password, String playername)
+    public static void setUsernameAndPassword(String username, String password)
     {
-        System.out.println("TNARIK: setting username and password -> "+username);
         String lastusername = AuthenticationHelper.username;
         String lastpassword = AuthenticationHelper.password;
-        String lastplayername = AuthenticationHelper.playername;
         AuthenticationHelper.username = username;
         AuthenticationHelper.password = password;
-        AuthenticationHelper.playername = playername;
-        if (!lastusername.equals(AuthenticationHelper.username) || !lastpassword.equals(AuthenticationHelper.password) || !lastplayername.equals(AuthenticationHelper.playername))
+        if (!lastusername.equals(AuthenticationHelper.username) || !lastpassword.equals(AuthenticationHelper.password))
         {
             AuthenticationHelper.isAuthenticated = switchUser();
             if (!AuthenticationHelper.isAuthenticated)
@@ -260,29 +253,27 @@ public class AuthenticationHelper
         auth.logOut();
         auth.setUsername(AuthenticationHelper.username);
         auth.setPassword(AuthenticationHelper.password);
-
-        System.out.println("TNARIK: switching user to -> "+AuthenticationHelper.username);
         try
         {
             if (!AuthenticationHelper.username.equals(UNAUTH) && !AuthenticationHelper.password.isEmpty())
             {
                 auth.logIn();
-                if (!forceSessionUpdate(auth, playername))
-                    return false;
+                if (forceSessionUpdate(auth))
+                    return true;
             }
         }
         catch (AuthenticationException e)
         {
-            return false;
         }
-        return true;
+        return false;
     }
 
-    private static boolean forceSessionUpdate(YggdrasilUserAuthentication auth, String playername)
+    private static boolean forceSessionUpdate(YggdrasilUserAuthentication auth)
     {
+        String playername = auth.getSelectedProfile().getName()+"_"+String.valueOf(AddressHelper.getMissionControlPort());
+
         // Create new session object:
-        System.out.println("TNARIK this is to create a new session from  -> "+auth.getSelectedProfile().getName());
-        Session newSession = new Session(auth.getSelectedProfile().getName()+"_"+String.valueOf(AddressHelper.getMissionControlPort()), auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), auth.getUserType().getName());
+        Session newSession = new Session(playername, auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), auth.getUserType().getName());
         // Are we in the dev environment or deployed?
         boolean devEnv = (Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
         // We need to know, because the member name will either be obfuscated or not.
@@ -294,7 +285,14 @@ public class AuthenticationHelper
             session = Minecraft.class.getDeclaredField(sessionMemberName);
             session.setAccessible(true);
             session.set(Minecraft.getMinecraft(), newSession);
-            System.out.println("TNARIK the new session is set");
+            // It seems setting the session doesn't apply to the game profile correctly
+            // Using code from (net.minecraft.client.Minecraft@launchIntegratedServer), we force a reload (using same fix as for Fixes MC-52974.)
+            com.mojang.authlib.GameProfile gameProfile = Minecraft.getMinecraft().getSession().getProfile();
+            if (!Minecraft.getMinecraft().getSession().hasCachedProperties())
+            {
+                gameProfile = Minecraft.getMinecraft().getSessionService().fillProfileProperties(gameProfile, true);
+                Minecraft.getMinecraft().getSession().setProperties(gameProfile.getProperties());
+            }
             return true;
         }
         catch (SecurityException e)
