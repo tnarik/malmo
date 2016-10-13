@@ -270,8 +270,10 @@ public class AuthenticationHelper
 
     private static boolean forceSessionUpdate(YggdrasilUserAuthentication auth)
     {
+        String playername = auth.getSelectedProfile().getName()+"_"+String.valueOf(AddressHelper.getMissionControlPort());
+
         // Create new session object:
-        Session newSession = new Session(auth.getSelectedProfile().getName(), auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), auth.getUserType().getName());
+        Session newSession = new Session(playername, auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), auth.getUserType().getName());
         // Are we in the dev environment or deployed?
         boolean devEnv = (Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
         // We need to know, because the member name will either be obfuscated or not.
@@ -283,6 +285,14 @@ public class AuthenticationHelper
             session = Minecraft.class.getDeclaredField(sessionMemberName);
             session.setAccessible(true);
             session.set(Minecraft.getMinecraft(), newSession);
+            // It seems setting the session doesn't apply to the game profile correctly
+            // Using code from (net.minecraft.client.Minecraft@launchIntegratedServer), we force a reload (using same fix as for Fixes MC-52974.)
+            com.mojang.authlib.GameProfile gameProfile = Minecraft.getMinecraft().getSession().getProfile();
+            if (!Minecraft.getMinecraft().getSession().hasCachedProperties())
+            {
+                gameProfile = Minecraft.getMinecraft().getSessionService().fillProfileProperties(gameProfile, true);
+                Minecraft.getMinecraft().getSession().setProperties(gameProfile.getProperties());
+            }
             return true;
         }
         catch (SecurityException e)
